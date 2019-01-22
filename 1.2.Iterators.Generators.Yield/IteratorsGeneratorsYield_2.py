@@ -15,8 +15,11 @@ def md5_file_1(file_in):
 
 
 def md5_file_2(start, end, file_in):
+    f = open(file_in, 'r', encoding='utf-8')
+    end_file = sum(1 for _ in f)
+    f.close()
     with open(file_in, 'r', encoding='utf-8') as f:
-        while start < end:
+        while start < end and start <= end_file:
             x = f.readline()
             h = hashlib.md5(x.encode())
             yield h.hexdigest()
@@ -28,7 +31,7 @@ for i in md5_file_1('countries-wiki.txt'):
 
 print('___________________')
 
-for i in md5_file_2(1, 5, 'countries-wiki.txt'):
+for i in md5_file_2(1, 100000, 'countries-wiki.txt'):
     print(i)
 
 # проверка
