@@ -1,0 +1,5 @@
+Function start date and time: 2019-01-30 21:58:42.193923
+Function name: adv_print
+Function argument: ['frfgrgerg', 456, 789]
+Named function arguments: {'start': 'start', 'in_file': 'test.txt'}
+Return:None
