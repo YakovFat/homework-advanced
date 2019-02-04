@@ -7,8 +7,8 @@ from config import user_email, password_email
 
 
 class MailHandler:
-    def __init__(self, user_login, password, DEFAULT_SMTP = "smtp.gmail.com",
-                 DEFAULT_IMAP = "imap.gmail.com", MAIL_SELECT = "inbox"):
+    def __init__(self, user_login, password, DEFAULT_SMTP="smtp.gmail.com",
+                 DEFAULT_IMAP="imap.gmail.com", MAIL_SELECT="inbox"):
         self.user_login = user_login
         self.password = password
         self.DEFAULT_SMTP = DEFAULT_SMTP
