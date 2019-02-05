@@ -3,17 +3,17 @@ import smtplib
 import imaplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from config import user_email, password_email
+from config import user_email, password_email, DEFAULT_SMTP, \
+    DEFAULT_IMAP, MAIL_SELECT
 
 
 class MailHandler:
-    def __init__(self, user_login, password, DEFAULT_SMTP="smtp.gmail.com",
-                 DEFAULT_IMAP="imap.gmail.com", MAIL_SELECT="inbox"):
+    def __init__(self, user_login, password, smtp=DEFAULT_SMTP,
+                 imap=DEFAULT_IMAP):
         self.user_login = user_login
         self.password = password
-        self.DEFAULT_SMTP = DEFAULT_SMTP
-        self.DEFAULT_IMAP = DEFAULT_IMAP
-        self.MAIL_SELECT = MAIL_SELECT
+        self.smtp = smtp
+        self.imap = imap
 
     def send_a_message(self, recipients, subject, message):
         msg = MIMEMultipart()
@@ -22,7 +22,7 @@ class MailHandler:
         msg['Subject'] = subject
         msg.attach(MIMEText(message))
 
-        ms = smtplib.SMTP(self.DEFAULT_SMTP, 587)
+        ms = smtplib.SMTP(self.smtp, 587)
         # identify ourselves to smtp gmail client
         ms.ehlo()
         # secure our email with tls encryption
@@ -36,11 +36,11 @@ class MailHandler:
         ms.quit()
         # send end
 
-    def receive_a_message(self, header):
-        mail = imaplib.IMAP4_SSL(self.DEFAULT_IMAP)
+    def receive_a_message(self, header=None, folder=MAIL_SELECT):
+        mail = imaplib.IMAP4_SSL(self.imap)
         mail.login(self.user_login, self.password)
         mail.list()
-        mail.select(self.MAIL_SELECT)
+        mail.select(folder)
         criterion = '(HEADER Subject "%s")' % header if header else 'ALL'
         result, data = mail.uid('search', None, criterion)
         assert data[0], 'There are no letters with current header'
@@ -57,4 +57,4 @@ if __name__ == '__main__':
     user_1 = MailHandler(user_email, password_email)
     user_1.send_a_message(['vasya@email.com', 'petya@email.com'],
                           'Subject', 'Message')
-    user_1.receive_a_message(None)
+    user_1.receive_a_message()
