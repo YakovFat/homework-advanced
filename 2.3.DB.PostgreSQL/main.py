@@ -1,7 +1,7 @@
 import psycopg2 as pg
 
-dbname = 'mydb'
-user = 'rk0f'
+dbname = ''
+user = ''
 
 
 def create():
