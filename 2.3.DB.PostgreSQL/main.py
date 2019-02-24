@@ -7,30 +7,27 @@ user = 'rk0f'
 def create_db():
     with pg.connect(dbname=dbname, user=user) as conn:
         with conn.cursor() as cur:
-            try:
-                cur.execute("""
-                    create table Student (
-                        id serial PRIMARY KEY,
-                        name varchar(100) not null,
-                        gpa numeric(10,2),
-                        birth timestamp with time zone
-                        );
-                    """)
-                cur.execute("""
-                    create table Course (
-                        id serial PRIMARY KEY,
-                        name varchar(100) not null
-                        );
-                    """)
-                cur.execute("""
-                    create table Student_Course (
-                        id serial PRIMARY KEY,
-                        student_id INTEGER REFERENCES Student(id) ON DELETE CASCADE,
-                        course_id INTEGER REFERENCES Course(id) ON DELETE CASCADE
-                        );
-                    """)
-            except pg.ProgrammingError:
-                print("Already exists")
+            cur.execute("""
+                create table IF NOT EXISTS Student (
+                    id serial PRIMARY KEY,
+                    name varchar(100) not null,
+                    gpa numeric(10,2),
+                    birth timestamp with time zone
+                    );
+                """)
+            cur.execute("""
+                create table IF NOT EXISTS Course (
+                    id serial PRIMARY KEY,
+                    name varchar(100) not null
+                    );
+                """)
+            cur.execute("""
+                create table IF NOT EXISTS Student_Course (
+                    id serial PRIMARY KEY,
+                    student_id INTEGER REFERENCES Student(id) ON DELETE CASCADE,
+                    course_id INTEGER REFERENCES Course(id) ON DELETE CASCADE
+                    );
+                """)
 
 
 def get_students(course_id):
@@ -76,5 +73,5 @@ def get_student(student_id):
 
 
 if __name__ == '__main__':
-    # create_db()
-    pass
+    create_db()
+
