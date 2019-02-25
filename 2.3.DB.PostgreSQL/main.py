@@ -55,9 +55,6 @@ def add_students(course_id, students):
         with pg.connect(dbname=dbname, user=user) as conn:
             with conn.cursor() as cur:
                 cur.execute("""
-                    select id from student where name = (%s);
-                    """, (i['name'],))
-                cur.execute("""
                    insert into Student_Course (student_id, course_id) values
                    (%s, %s);
                    """, (id_s, course_id))
@@ -73,5 +70,7 @@ def get_student(student_id):
 
 
 if __name__ == '__main__':
-    create_db()
+    students = [{'name': 'iii', 'gpa': 5, 'birth': '1994-01-01'},
+                {'name': 'bbb', 'gpa': 5, 'birth': '1994-01-01'}]
+    add_students(1, students)
 
