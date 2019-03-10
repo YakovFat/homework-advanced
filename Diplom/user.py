@@ -8,7 +8,7 @@ from config_pass import APP_ID, LOGIN, PASSWORD
 
 session = vk.AuthSession(app_id=APP_ID, user_login=LOGIN,
                          user_password=PASSWORD, scope='groups')
-api = vk.API(session, timeout=1)
+api = vk.API(session)
 
 FIELDS = 'bdate, sex, city, interests, books, games, movies, music, ' \
          'common_count'
@@ -126,11 +126,11 @@ class User:
     def analysis_of_weights(self):
         users_info = User.analysis_groups(self)
         for i in users_info:
-            print(i)
+
             i['rating'] = i['common_count'] * 1.2 + i['interests_count'] * \
                           1.3 + i['music_count'] + i['movies_count'] * 1.4 + \
-                          i['books_count'] * 1.25 + i['games_count'] * 1.35 +\
-                          i['len_mutual_groups'] * 1.5
+                          i['books_count'] * 1.25 + i['games_count'] * 1.35 #+\
+                          #i['len_mutual_groups'] * 1.5
         users_info.sort(key=itemgetter('rating'), reverse=True)
         return users_info[:10]
 
@@ -138,16 +138,24 @@ class User:
         users_info = User.analysis_of_weights(self)
         result = {'result': None}
         photo_list = []
+        people_list = []
+        people = {}
         for i in users_info:
-            search = api.photos.get(owner_id=i['id'], album_id='profile',
-                                    extended=1, v='5.92')
-            for ph in search['items']:
-                photo_list.append({'likes': ph['likes']['count'],
-                                   'photo': ph['sizes'][-1]['url']})
-            photo_list.sort(key=itemgetter('likes'), reverse=True)
-            people = {}
-            people['profile'] = 'https://vk.com/id' + str(i['id'])
-            people['photo'] = photo_list[:3]
-            result['result'] = people
-            photo_list = []
+            try:
+                search = api.photos.get(owner_id=i['id'], album_id='profile',
+                                        extended=1, v='5.92')
+                for ph in search['items']:
+                    photo_list.append({'likes': ph['likes']['count'],
+                                       'photo': ph['sizes'][-1]['url']})
+                photo_list.sort(key=itemgetter('likes'), reverse=True)
+                people['profile'] = 'https://vk.com/id' + str(i['id'])
+                people['photo'] = photo_list[:3]
+                people_list.append(people)
+
+            except vk.exceptions.VkAPIError as e:
+                if '6. Too many requests per second' in str(e):
+                    users_info.append(i)
+                    users_info.remove(i)
+                    time.sleep(1)
+        result['result'] = people_list
         return result
