@@ -4,8 +4,13 @@ import sys
 import time
 from operator import itemgetter
 from datetime import datetime
-from config_pass import APP_ID, LOGIN, PASSWORD
+from config_pass import APP_ID
 
+print('Пожалуйста, введите логин и пароль: ')
+print('Логин: ')
+LOGIN = input()
+print('Пароль: ')
+PASSWORD = input()
 session = vk.AuthSession(app_id=APP_ID, user_login=LOGIN,
                          user_password=PASSWORD, scope='groups')
 api = vk.API(session)
@@ -136,6 +141,7 @@ class User:
 
     def profile_and_photo(self):
         users_info = User.analysis_of_weights(self)
+        print(users_info)
         result = {'result': None}
         photo_list = []
         people_list = []

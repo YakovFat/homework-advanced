@@ -1,4 +1,1 @@
-TOKEN = ''
-APP_ID = ''
-LOGIN = ''
-PASSWORD = ''
+APP_ID = '6773521'
