@@ -129,8 +129,8 @@ class User:
 
             i['rating'] = i['common_count'] * 1.2 + i['interests_count'] * \
                           1.3 + i['music_count'] + i['movies_count'] * 1.4 + \
-                          i['books_count'] * 1.25 + i['games_count'] * 1.35 #+\
-                          #i['len_mutual_groups'] * 1.5
+                          i['books_count'] * 1.25 + i['games_count'] * 1.35 +\
+                          i['len_mutual_groups'] * 1.5
         users_info.sort(key=itemgetter('rating'), reverse=True)
         return users_info[:10]
 
