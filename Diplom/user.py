@@ -83,18 +83,38 @@ class User:
                                   age_from=age - 5,
                                   age_to=age + 5, v='5.92',
                                   fields=FIELDS, is_closed=False,
-                                  count=1000)
+                                  count=100)
         return search
 
     def analysis_interests(self):
         info_user = self.user_id[0]
         search = User.user_search(self)['items']
         count = 0
-        interests = info_user['interests'].lower().split(', ')
-        music = info_user['music'].lower().split(', ')
-        movies = info_user['movies'].lower().split(', ')
-        books = info_user['books'].lower().split(', ')
-        games = info_user['games'].lower().split(', ')
+        interests = info_user.setdefault('interests', '').lower().split(', ')
+        if interests[0] == '':
+            print('Укажите свои интересы: ')
+            interests = input().lower().split(
+                ', ')
+        music = info_user.setdefault('music', '').lower().split(', ')
+        if music[0] == '':
+            print('Укажите любимую музыку: ')
+            music = input().lower().split(
+                ', ')
+        movies = info_user.setdefault('movies', '').lower().split(', ')
+        if movies[0] == '':
+            print('Укажите любимые фильмы: ')
+            movies = input().lower().split(
+                ', ')
+        books = info_user.setdefault('books', '').lower().split(', ')
+        if books[0] == '':
+            print('Укажите любимык книги: ')
+            books = input().lower().split(
+                ', ')
+        games = info_user.setdefault('games', '').lower().split(', ')
+        if games[0] == '':
+            print('Укажите любимые игры: ')
+            games = input().lower().split(
+                ', ')
         list_interests = [(interests, 'interests'), (music, 'music'),
                           (movies, 'movies'), (books, 'books'),
                           (games, 'games')]
