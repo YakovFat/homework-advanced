@@ -151,23 +151,22 @@ class User:
     def analysis_of_weights(self):
         users_info = User.analysis_groups(self)
         for i in users_info:
-
             i['rating'] = i['common_count'] * 1.2 + i['interests_count'] * \
                           1.3 + i['music_count'] + i['movies_count'] * 1.4 + \
-                          i['books_count'] * 1.25 + i['games_count'] * 1.35 +\
-                          i['len_mutual_groups'] * 1.5
+                          i['books_count'] * 1.25 + i['games_count'] * 1.35 #+\
+                          #i['len_mutual_groups'] * 1.5
         users_info.sort(key=itemgetter('rating'), reverse=True)
         return users_info[:10]
 
     def profile_and_photo(self):
         users_info = User.analysis_of_weights(self)
-        print(users_info)
         result = {'result': None}
         photo_list = []
         people_list = []
         people = {}
         for i in users_info:
             try:
+
                 search = api.photos.get(owner_id=i['id'], album_id='profile',
                                         extended=1, v='5.92')
                 for ph in search['items']:
@@ -177,6 +176,8 @@ class User:
                 people['profile'] = 'https://vk.com/id' + str(i['id'])
                 people['photo'] = photo_list[:3]
                 people_list.append(people)
+                people = {}
+                photo_list = []
 
             except vk.exceptions.VkAPIError as e:
                 if '6. Too many requests per second' in str(e):
