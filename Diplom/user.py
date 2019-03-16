@@ -2,9 +2,13 @@ import vk
 import re
 import sys
 import time
+import json
+import copy
+from db_mongo import write_to_database
+from json_file import json_vkinder
 from operator import itemgetter
 from datetime import datetime
-from config_pass import APP_ID
+from config_pass import *
 
 print('Пожалуйста, введите логин и пароль: ')
 print('Логин: ')
@@ -16,7 +20,7 @@ session = vk.AuthSession(app_id=APP_ID, user_login=LOGIN,
 api = vk.API(session)
 
 FIELDS = 'bdate, sex, city, interests, books, games, movies, music, ' \
-         'common_count'
+         'common_count, relation'
 
 
 class User:
@@ -82,8 +86,18 @@ class User:
                                   sex=User.sex_user(self),
                                   age_from=age - 5,
                                   age_to=age + 5, v='5.92',
-                                  fields=FIELDS, is_closed=False,
-                                  count=100)
+                                  fields=FIELDS, count=100, status=6)
+        search_copy = copy.copy(search)
+        try:
+            with open("Vkinder v2.0.json", "r") as data_file:
+                data = json.load(data_file)
+                if str(self.user_id[0]['id']) in data['user']:
+                    for us in data['result']:
+                        for i in search_copy['items']:
+                            if str(i['id']) in us['profile']:
+                                search['items'].remove(i)
+        except FileNotFoundError:
+            pass
         return search
 
     def analysis_interests(self):
@@ -131,7 +145,7 @@ class User:
                 count = 0
         return search
 
-    def analysis_groups(self): # ЗДЕСЬ ОШИБКА, НЕ ВСЕГДА ЗАПИСЫВАЕТСЯ ПОЛЕ 'len_mutual_groups'
+    def analysis_groups(self):
         user_groups = api.groups.get(user_id=self.user_id[0]['id'], v='5.92')['items']
         users_info = User.analysis_interests(self)
         for i in users_info:
@@ -141,11 +155,12 @@ class User:
                 i['len_mutual_groups'] = len_mutual_groups
             except vk.exceptions.VkAPIError as e:
                 if '6. Too many requests per second' in str(e):
-                    users_info.append(i)
-                    users_info.remove(i)
                     time.sleep(1)
                 else:
-                    i['len_mutual_groups'] = 0
+                    users_info.remove(i)
+        for user in users_info[:]:
+            if 'len_mutual_groups' not in user:
+                users_info.remove(user)
         return users_info
 
     def analysis_of_weights(self):
@@ -160,13 +175,13 @@ class User:
 
     def profile_and_photo(self):
         users_info = User.analysis_of_weights(self)
-        result = {'result': None}
-        photo_list = []
+        result = {}
+        result['user'] = 'https://vk.com/id' + str(self.user_id[0]['id'])
         people_list = []
-        people = {}
         for i in users_info:
             try:
-
+                people = {}
+                photo_list = []
                 search = api.photos.get(owner_id=i['id'], album_id='profile',
                                         extended=1, v='5.92')
                 for ph in search['items']:
@@ -176,13 +191,10 @@ class User:
                 people['profile'] = 'https://vk.com/id' + str(i['id'])
                 people['photo'] = photo_list[:3]
                 people_list.append(people)
-                people = {}
-                photo_list = []
-
             except vk.exceptions.VkAPIError as e:
                 if '6. Too many requests per second' in str(e):
-                    users_info.append(i)
-                    users_info.remove(i)
                     time.sleep(1)
         result['result'] = people_list
+        json_vkinder(result)
+        write_to_database(result)
         return result
